@@ -7,18 +7,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install MinGW and libusb
+
+      - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y gcc-mingw-w64-x86-64 libusb-1.0-0-dev
-          wget https://github.com/libusb/libusb/releases/download/v1.0.26/libusb-1.0.26.7z
-          sudo apt-get install -y p7zip-full
-          7z x libusb-1.0.26.7z -olibusb
-      - name: Compile
+          sudo apt-get install -y gcc-mingw-w64-x86-64 p7zip-full curl
+
+      - name: Download and unpack libusb
+        run: |
+          curl -L -o libusb.7z https://github.com/libusb/libusb/releases/download/v1.0.27/libusb-1.0.27.7z
+          7z x libusb.7z -olibusb
+
+      - name: Compile asix_eepromtool
         run: |
           x86_64-w64-mingw32-gcc asix_eepromtool.c -o asix_eepromtool.exe \
             -Ilibusb/include/libusb-1.0 \
-            -Llibusb/MinGW64/static -lusb-1.0 -static
+            -Llibusb/MinGW64/static \
+            -lusb-1.0 -lsetupapi -static
+
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
