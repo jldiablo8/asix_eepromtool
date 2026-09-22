@@ -20,8 +20,12 @@ jobs:
 
       - name: Patch C code for Windows
         run: |
+          # Replace Linux networking headers
           sed -i 's/<arpa\/inet.h>/<winsock2.h>/g' asix_eepromtool.c
           sed -i 's/<netinet\/in.h>//g' asix_eepromtool.c
+          
+          # Replace <endian.h> with Windows/GCC byte-swap definitions
+          sed -i 's/#include <endian.h>/#define htobe16(x) __builtin_bswap16(x)\n#define be16toh(x) __builtin_bswap16(x)\n#define htole16(x) (x)\n#define le16toh(x) (x)/g' asix_eepromtool.c
 
       - name: Compile asix_eepromtool
         run: |
